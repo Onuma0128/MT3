@@ -66,6 +66,14 @@ Matrix4x4 Inverse(const Matrix4x4& m) {
 	return result;
 }
 
+Vector3 Multiply(float scalar, const Vector3& v) {
+	Vector3 result{};
+	result.x = v.x * scalar;
+	result.y = v.y * scalar;
+	result.z = v.z * scalar;
+	return result;
+}
+
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	Matrix4x4 result{};
 	result.m[0][0] = m1.m[0][0] * m2.m[0][0] + m1.m[0][1] * m2.m[1][0] + m1.m[0][2] * m2.m[2][0] + m1.m[0][3] * m2.m[3][0];
@@ -172,6 +180,71 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 		left + width / 2, top + height / 2, minDepth, 1};
 	return result;
 }
+void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
+	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
+	const uint32_t kSubdivision = 10;                                       // 分割数
+	const float kGridEvery = (kGridHalfWidth * 2.0f) / float(kSubdivision); // 1つ分の長さ
+	Vector3 startLine[11]{};
+	Vector3 endLine[11]{};
+	Vector3 startScreenLine[11]{};
+	Vector3 endScreenLine[11]{};
+	// 奥から手前への線を順々に引いていく
+	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex) {
+		startLine[xIndex] = {kGridEvery * (xIndex - 5.0f), -0.5f, -1.5f + kGridEvery * 10};
+		Vector3 ndcVertex = Transform(startLine[xIndex], viewProjectionMatrix);
+		startScreenLine[xIndex] = Transform(ndcVertex, viewportMatrix);
+
+		endLine[xIndex] = {kGridEvery * (xIndex - 5.0f), -0.5f, -1.5f};
+		Vector3 endVertex = Transform(endLine[xIndex], viewProjectionMatrix);
+		endScreenLine[xIndex] = Transform(endVertex, viewportMatrix);
+		if (xIndex == 5) {
+			Novice::DrawLine((int)startScreenLine[xIndex].x, (int)startScreenLine[xIndex].y, (int)endScreenLine[xIndex].x, (int)endScreenLine[xIndex].y, BLACK);
+		} else {
+			Novice::DrawLine((int)startScreenLine[xIndex].x, (int)startScreenLine[xIndex].y, (int)endScreenLine[xIndex].x, (int)endScreenLine[xIndex].y, 0xAAAAAAFF);
+		}
+	}
+	// 左から右への線を順々に引いていく
+	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex) {
+		startLine[zIndex] = {-kGridEvery * 5.0f, -0.5f, kGridEvery * zIndex - 1.5f};
+		Vector3 ndcVertex = Transform(startLine[zIndex], viewProjectionMatrix);
+		startScreenLine[zIndex] = Transform(ndcVertex, viewportMatrix);
+
+		endLine[zIndex] = {kGridEvery * 5.0f, -0.5f, kGridEvery * zIndex - 1.5f};
+		Vector3 endVertex = Transform(endLine[zIndex], viewProjectionMatrix);
+		endScreenLine[zIndex] = Transform(endVertex, viewportMatrix);
+		if (zIndex == 5) {
+			Novice::DrawLine((int)startScreenLine[zIndex].x, (int)startScreenLine[zIndex].y, (int)endScreenLine[zIndex].x, (int)endScreenLine[zIndex].y, BLACK);
+		} else {
+			Novice::DrawLine((int)startScreenLine[zIndex].x, (int)startScreenLine[zIndex].y, (int)endScreenLine[zIndex].x, (int)endScreenLine[zIndex].y, 0xAAAAAAFF);
+		}
+	}
+}
+
+void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4 viewportMatrix, uint32_t color) {
+	const uint32_t kSubdivision = 20;              // 分割数
+	const float kLonEvery = pi / kSubdivision; // 経度
+	const float kLatEvery = 2 * pi / kSubdivision;     // 緯度
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat = -pi / 2.0f + kLatEvery * latIndex; // 緯度の方向に分割
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+			float lon = lonIndex * kLonEvery; // 経度の方向に分割
+			//初期化と移動の処理
+			Vector3 a{std::cos(lat) * std::cos(lon) + sphere.center.x, std::sin(lat) + sphere.center.y, std::cos(lat) * std::sin(lon) + sphere.center.z}, 
+				    b{std::cos(lat + kLatEvery) * std::cos(lon) + sphere.center.x, std::sin(lat + kLatEvery) + sphere.center.y, std::cos(lat + kLatEvery) * std::sin(lon) + sphere.center.z},
+			        c{std::cos(lat) * std::cos(lon + kLonEvery) + sphere.center.x, std::sin(lat) + sphere.center.y, std::cos(lat) * std::sin(lon + kLonEvery) + sphere.center.z};
+			//拡縮の処理
+			Vector3 a1, b1, c1{};
+			a1 = Transform(Multiply(sphere.radius, Transform(a, viewProjectionMatrix)),viewportMatrix);
+			b1 = Transform(Multiply(sphere.radius, Transform(b, viewProjectionMatrix)),viewportMatrix);
+			c1 = Transform(Multiply(sphere.radius, Transform(c, viewProjectionMatrix)),viewportMatrix);
+			//経度(縦)
+			Novice::DrawLine((int)a1.x, (int)a1.y, (int)b1.x, (int)b1.y, color);
+			//緯度(横)
+			Novice::DrawLine((int)a1.x, (int)a1.y, (int)c1.x, (int)c1.y, color);
+		}
+	}
+}
+
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {
 	Novice::ScreenPrintf(x, y, "%.02f", vector.x);
 	Novice::ScreenPrintf(x + kColumnWidth, y, "%.02f", vector.y);

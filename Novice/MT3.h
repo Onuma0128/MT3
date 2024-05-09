@@ -9,6 +9,14 @@ struct Vector3 {
 struct Matrix4x4 {
 	float m[4][4];
 };
+
+struct Sphere {
+	Vector3 center;
+	float radius;
+};
+//パイ
+const float pi = 3.14f;
+
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
 // 座標変換
@@ -20,6 +28,8 @@ Matrix4x4 MakeRotateYMatrix(float radian);
 // 3.z軸の回転行列
 Matrix4x4 MakeRotateZMatrix(float radian);
 
+// スカラー倍
+Vector3 Multiply(float scalar, const Vector3& v);
 // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 // 3次元アフィン変換
@@ -34,6 +44,11 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip,
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 // 3、ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+
+// Grid
+void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
+//Sphere
+void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4 viewportMatrix, uint32_t color);
 
 // 数値表示
 static const int kColumnWidth = 60;
