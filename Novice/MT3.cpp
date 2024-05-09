@@ -66,6 +66,12 @@ Matrix4x4 Inverse(const Matrix4x4& m) {
 	return result;
 }
 
+float Dot(const Vector3& v1, const Vector3& v2) {
+	float result{};
+	result = (v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z);
+	return result;
+}
+
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	Matrix4x4 result{};
 	result.m[0][0] = m1.m[0][0] * m2.m[0][0] + m1.m[0][1] * m2.m[1][0] + m1.m[0][2] * m2.m[2][0] + m1.m[0][3] * m2.m[3][0];

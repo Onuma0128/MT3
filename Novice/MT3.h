@@ -20,6 +20,8 @@ Matrix4x4 MakeRotateYMatrix(float radian);
 // 3.z軸の回転行列
 Matrix4x4 MakeRotateZMatrix(float radian);
 
+// 内積
+float Dot(const Vector3& v1, const Vector3& v2);
 // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 // 3次元アフィン変換
