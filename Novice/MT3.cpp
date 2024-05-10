@@ -180,6 +180,7 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 		left + width / 2, top + height / 2, minDepth, 1};
 	return result;
 }
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数
