@@ -39,6 +39,12 @@ Matrix4x4 MakeRotateYMatrix(float radian);
 // 3.z軸の回転行列
 Matrix4x4 MakeRotateZMatrix(float radian);
 
+// 減算
+Vector3 Subtract(const Vector3& v1, const Vector3& v2);
+// 内積
+float Dot(const Vector3& v1, const Vector3& v2);
+// 正規化
+Vector3 Normalize(const Vector3& v);
 // スカラー倍
 Vector3 Multiply(float scalar, const Vector3& v);
 // 行列の積
@@ -58,6 +64,8 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 
 // 正射影ベクトル
 Vector3 Project(const Vector3& v1, const Vector3& v2);
+//最近接点
+Vector3 ClosestPoint(const Vector3& point, const Segment& segment);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);

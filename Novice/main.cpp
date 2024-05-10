@@ -30,9 +30,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         {3.0f,  2.0f,  2.0f}
     };
 	Vector3 point{-1.5f, 0.6f, 0.6f};
-
-
 	Sphere pointSphere{point, 0.01f};
+
+	Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
 
 
 	// ウィンドウの×ボタンが押されるまでループ
