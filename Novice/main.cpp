@@ -25,9 +25,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 cameraRotate{0.26f, 0, 0};
 	Vector3 cameraPosition{0.0f,1.9f,-6.49f};
 
-	Sphere sphere{};
-	sphere.radius = 0.5f;
-	uint32_t color = 0x000000FF;
+	Segment segment{
+	    {-2.0f, -1.0f, 0.0f},
+        {3.0f,  2.0f,  2.0f}
+    };
+	Vector3 point{-1.5f, 0.6f, 0.6f};
+
+
+	Sphere pointSphere{point, 0.01f};
 
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -53,8 +58,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Window");
 		ImGui::DragFloat3("CameraTranslate", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
-		ImGui::DragFloat3("SphereCenter", &sphere.center.x, 0.01f);
-		ImGui::DragFloat("SphereRadius", &sphere.radius, 0.01f);
+		ImGui::DragFloat3("SphereCenter", &pointSphere.center.x, 0.01f);
+		ImGui::DragFloat("SphereRadius", &pointSphere.radius, 0.01f);
 		ImGui::End();
 
 		///
@@ -66,7 +71,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
+		DrawSphere(pointSphere, worldViewProjectionMatrix, viewportMatrix, RED);
 
 		///
 		/// ↑描画処理ここまで

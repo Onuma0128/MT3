@@ -180,6 +180,11 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 		left + width / 2, top + height / 2, minDepth, 1};
 	return result;
 }
+
+//Vector3 Project(const Vector3& v1, const Vector3& v2) {
+//
+//}
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数
@@ -229,14 +234,14 @@ void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, con
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
 			float lon = lonIndex * kLonEvery; // 経度の方向に分割
 			//初期化と移動の処理
-			Vector3 a{std::cos(lat) * std::cos(lon) + sphere.center.x, std::sin(lat) + sphere.center.y, std::cos(lat) * std::sin(lon) + sphere.center.z}, 
-				    b{std::cos(lat + kLatEvery) * std::cos(lon) + sphere.center.x, std::sin(lat + kLatEvery) + sphere.center.y, std::cos(lat + kLatEvery) * std::sin(lon) + sphere.center.z},
-			        c{std::cos(lat) * std::cos(lon + kLonEvery) + sphere.center.x, std::sin(lat) + sphere.center.y, std::cos(lat) * std::sin(lon + kLonEvery) + sphere.center.z};
-			//拡縮の処理
+			Vector3 a{std::cos(lat) * std::cos(lon) * sphere.radius + sphere.center.x, std::sin(lat) * sphere.radius + sphere.center.y, std::cos(lat) * std::sin(lon) * sphere.radius  + sphere.center.z}, 
+				    b{std::cos(lat + kLatEvery) * std::cos(lon) * sphere.radius + sphere.center.x, std::sin(lat + kLatEvery) * sphere.radius + sphere.center.y,std::cos(lat + kLatEvery) * std::sin(lon) * sphere.radius + sphere.center.z},
+			        c{std::cos(lat) * std::cos(lon + kLonEvery) * sphere.radius + sphere.center.x, std::sin(lat) * sphere.radius + sphere.center.y,
+			          std::cos(lat) * std::sin(lon + kLonEvery) * sphere.radius + sphere.center.z};
 			Vector3 a1, b1, c1{};
-			a1 = Transform(Multiply(sphere.radius, Transform(a, viewProjectionMatrix)),viewportMatrix);
-			b1 = Transform(Multiply(sphere.radius, Transform(b, viewProjectionMatrix)),viewportMatrix);
-			c1 = Transform(Multiply(sphere.radius, Transform(c, viewProjectionMatrix)),viewportMatrix);
+			a1 = Transform(Transform(a, viewProjectionMatrix),viewportMatrix);
+			b1 = Transform(Transform(b, viewProjectionMatrix),viewportMatrix);
+			c1 = Transform(Transform(c, viewProjectionMatrix),viewportMatrix);
 			//経度(縦)
 			Novice::DrawLine((int)a1.x, (int)a1.y, (int)b1.x, (int)b1.y, color);
 			//緯度(横)

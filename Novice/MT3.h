@@ -2,20 +2,31 @@
 #include <cmath>
 #include <cassert>
 
+// パイ
+const float pi = 3.14f;
+
 struct Vector3 {
 	float x, y, z;
 };
-
 struct Matrix4x4 {
 	float m[4][4];
 };
-
 struct Sphere {
 	Vector3 center;
 	float radius;
 };
-//パイ
-const float pi = 3.14f;
+struct Line {
+	Vector3 origin;
+	Vector3 diff;
+};
+struct Ray {
+	Vector3 origin;
+	Vector3 diff;
+};
+struct Segment {
+	Vector3 origin;
+	Vector3 diff;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
@@ -44,6 +55,9 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip,
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 // 3、ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+
+// 正射影ベクトル
+Vector3 Project(const Vector3& v1, const Vector3& v2);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
