@@ -39,10 +39,14 @@ Matrix4x4 MakeRotateYMatrix(float radian);
 // 3.z軸の回転行列
 Matrix4x4 MakeRotateZMatrix(float radian);
 
+// 加算
+Vector3 Add(const Vector3& v1, const Vector3& v2);
 // 減算
 Vector3 Subtract(const Vector3& v1, const Vector3& v2);
 // 内積
 float Dot(const Vector3& v1, const Vector3& v2);
+// 長さ
+float Length(const Vector3& v);
 // 正規化
 Vector3 Normalize(const Vector3& v);
 // スカラー倍
