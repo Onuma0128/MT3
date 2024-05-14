@@ -236,6 +236,15 @@ Vector3 ClosestPoint(const Vector3& point, const Segment& segment) {
 	return result;
 }
 
+bool IsCollision(const Sphere& s1, const Sphere& s2) { 
+	float distance = Length(Subtract(s1.center, s2.center));
+	if (distance <= s1.radius + s2.radius) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数

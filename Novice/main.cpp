@@ -25,13 +25,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 cameraRotate{0.26f, 0, 0};
 	Vector3 cameraPosition{0.0f,1.9f,-6.49f};
 
-	Segment segment{
-	    {-2.0f, -1.0f, 0.0f},
-        {3.0f,  2.0f,  2.0f}
-    };
-	Vector3 point{-1.5f, 0.6f, 0.6f};
-	
-	Vector3 project = Project(Subtract(point, segment.origin), segment.diff);
+	Sphere sphere[2]{};
+	sphere[0].radius = 0.6f;
+	sphere[1] = {0.8f, 0, 1.0f, 0.4f};
+	uint32_t sphereColor = BLACK;
+
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -45,11 +43,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-		
-		Vector3 closestPoint = ClosestPoint(point, segment);
-
-		Sphere pointSphere{point, 0.01f};
-		Sphere closestPointSphere{closestPoint, 0.01f};
 
 		Matrix4x4 worldMatrix = MakeAfineMatrix(traiangleScale, traiangleRotate, traiangleTranslate);
 		Matrix4x4 cametaMatrix = MakeAfineMatrix(cameraScale, cameraRotate, cameraPosition);
@@ -58,15 +51,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
-		Vector3 start = Transform(Transform(segment.origin, worldViewProjectionMatrix), viewportMatrix);
-		Vector3 end = Transform(Transform(Add(segment.origin,segment.diff), worldViewProjectionMatrix), viewportMatrix);
-
 		ImGui::Begin("Window");
-		ImGui::DragFloat3("point", &point.x, 0.01f);
-		ImGui::DragFloat3("segment_origin", &segment.origin.x, 0.01f);
-		ImGui::DragFloat3("segment_diff", &segment.diff.x, 0.01f);
-		ImGui::DragFloat3("project", &project.x, 0.01f);
+		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
+		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
+		ImGui::DragFloat3("sphere[1].center", &sphere[1].center.x, 0.01f);
+		ImGui::DragFloat("sphere[1].radius", &sphere[1].radius, 0.01f);
+		ImGui::DragFloat3("CameraTranslate", &cameraPosition.x, 0.01f);
+		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
 		ImGui::End();
+
+		if (IsCollision(sphere[0], sphere[1])) {
+			sphereColor = RED;
+		} else {
+			sphereColor = BLACK;
+		}
 
 		///
 		/// ↑更新処理ここまで
@@ -77,9 +75,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		Novice::DrawLine(int(start.x), (int)start.y, int(end.x), (int)end.y, WHITE);
-		DrawSphere(pointSphere, worldViewProjectionMatrix, viewportMatrix, RED);
-		DrawSphere(closestPointSphere, worldViewProjectionMatrix, viewportMatrix, BLACK);
+
+		DrawSphere(sphere[0], worldViewProjectionMatrix, viewportMatrix, sphereColor);
+		DrawSphere(sphere[1], worldViewProjectionMatrix, viewportMatrix, sphereColor);
 
 		///
 		/// ↑描画処理ここまで
