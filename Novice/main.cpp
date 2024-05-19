@@ -25,11 +25,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 cameraRotate{0.26f, 0, 0};
 	Vector3 cameraPosition{0.0f,1.9f,-6.49f};
 
-	Sphere sphere[2]{};
-	sphere[0].radius = 0.6f;
-	sphere[1] = {0.8f, 0, 1.0f, 0.4f};
-	uint32_t sphereColor = BLACK;
+	Sphere sphere{};
+	sphere = {0.12f, 0.0f, 0.0f, 0.6f};
+	uint32_t sphereColor = WHITE;
 
+	Plane plane{1.0f, 2.0f, 0.0f};
+	uint32_t planeColor = WHITE;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -52,18 +53,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
 		ImGui::Begin("Window");
-		ImGui::DragFloat3("sphere[0].center", &sphere[0].center.x, 0.01f);
-		ImGui::DragFloat("sphere[0].radius", &sphere[0].radius, 0.01f);
-		ImGui::DragFloat3("sphere[1].center", &sphere[1].center.x, 0.01f);
-		ImGui::DragFloat("sphere[1].radius", &sphere[1].radius, 0.01f);
+		ImGui::DragFloat3("sphere[0].center", &sphere.center.x, 0.01f);
+		ImGui::DragFloat("sphere[0].radius", &sphere.radius, 0.01f);
+		ImGui::DragFloat3("Plane.Normal", &plane.normal.x, 0.01f);
+		ImGui::DragFloat("Plane.distance", &plane.distance, 0.01f);
 		ImGui::DragFloat3("CameraTranslate", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
 		ImGui::End();
 
-		if (IsCollision(sphere[0], sphere[1])) {
+		plane.normal = Normalize(plane.normal);
+
+		if (IsCollision(sphere, plane)) {
 			sphereColor = RED;
 		} else {
-			sphereColor = BLACK;
+			sphereColor = WHITE;
 		}
 
 		///
@@ -75,9 +78,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-
-		DrawSphere(sphere[0], worldViewProjectionMatrix, viewportMatrix, sphereColor);
-		DrawSphere(sphere[1], worldViewProjectionMatrix, viewportMatrix, sphereColor);
+		DrawPlane(plane, worldViewProjectionMatrix, viewportMatrix, planeColor);
+		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, sphereColor);
 
 		///
 		/// ↑描画処理ここまで

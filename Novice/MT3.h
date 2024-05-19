@@ -27,6 +27,10 @@ struct Segment {
 	Vector3 origin;
 	Vector3 diff;
 };
+struct Plane {
+	Vector3 normal;
+	float distance;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
@@ -70,14 +74,20 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 Vector3 Project(const Vector3& v1, const Vector3& v2);
 // 最近接点
 Vector3 ClosestPoint(const Vector3& point, const Segment& segment);
+//
+Vector3 Perpendicular(const Vector3& vector);
 
 //球と球の衝突判定
 bool IsCollision(const Sphere& s1, const Sphere& s2);
+//球と平面の衝突判定
+bool IsCollision(const Sphere& sphere, const Plane& plane);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
 //Sphere
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4 viewportMatrix, uint32_t color);
+//平面の描画
+void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 // 数値表示
 static const int kColumnWidth = 60;

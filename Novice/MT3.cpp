@@ -236,9 +236,25 @@ Vector3 ClosestPoint(const Vector3& point, const Segment& segment) {
 	return result;
 }
 
+Vector3 Perpendicular(const Vector3& vector) { 
+	if (vector.x != 0.0f || vector.y != 0.0f) {
+		return {-vector.y, vector.x, 0.0f};
+	}
+	return {0.0f, -vector.z, vector.y};
+}
+
 bool IsCollision(const Sphere& s1, const Sphere& s2) { 
 	float distance = Length(Subtract(s1.center, s2.center));
 	if (distance <= s1.radius + s2.radius) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
+bool IsCollision(const Sphere& sphere, const Plane& plane) { 
+	float k = std::fabs(Dot(plane.normal, sphere.center) - plane.distance);
+	if (k <= sphere.radius) {
 		return true;
 	} else {
 		return false;
@@ -308,6 +324,25 @@ void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, con
 			Novice::DrawLine((int)a1.x, (int)a1.y, (int)c1.x, (int)c1.y, color);
 		}
 	}
+}
+
+void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) { 
+	Vector3 center = Multiply(plane.distance, plane.normal);
+	Vector3 perpendiculars[4];
+	perpendiculars[0] = Normalize(Perpendicular(plane.normal));
+	perpendiculars[1] = {-perpendiculars[0].x, -perpendiculars[0].y, -perpendiculars[0].z};
+	perpendiculars[2] = Cross(plane.normal, perpendiculars[0]);
+	perpendiculars[3] = {-perpendiculars[2].x, -perpendiculars[2].y, -perpendiculars[2].z};
+	Vector3 points[4];
+	for (int32_t index = 0; index < 4; ++index) {
+		Vector3 extend = Multiply(2.0f, perpendiculars[index]);
+		Vector3 point = Add(center, extend);
+		points[index] = Transform(Transform(point, viewProjectionMatrix), viewportMatrix);
+	}
+	Novice::DrawLine((int)points[0].x, (int)points[0].y, (int)points[2].x, (int)points[2].y, color);
+	Novice::DrawLine((int)points[2].x, (int)points[2].y, (int)points[1].x, (int)points[1].y, color);
+	Novice::DrawLine((int)points[1].x, (int)points[1].y, (int)points[3].x, (int)points[3].y, color);
+	Novice::DrawLine((int)points[3].x, (int)points[3].y, (int)points[0].x, (int)points[0].y, color);
 }
 
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {
