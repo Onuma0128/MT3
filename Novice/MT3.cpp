@@ -275,8 +275,57 @@ bool IsCollision(const Segment& segment, const Plane& plane) {
 	return false; 
 }
 
-bool IsCollision(const Triangle& triangle, const Segment& segment) { 
-	return false; 
+// 線分が平面と交差するかを判定する関数
+bool LineIntersectsPlane(const Triangle& triangle, const Segment& segment, Vector3& intersection) {
+	Vector3 edge1 = Subtract(triangle.vertices[1], triangle.vertices[0]);
+	Vector3 edge2 = Subtract(triangle.vertices[2], triangle.vertices[0]);
+	Vector3 normal = Cross(edge1, edge2);
+
+	float d = -Dot(normal, triangle.vertices[0]);
+	float dot1 = Dot(normal, segment.origin) + d;
+	float dot2 = Dot(normal, Add(segment.origin, segment.diff)) + d;
+	if (dot1 * dot2 > 0) {
+		return false; // 両端点が平面の同じ側にある
+	}
+
+	float t = dot1 / (dot1 - dot2);
+	intersection = Add(segment.origin, Multiply(t, segment.diff));
+
+	return true;
+}
+
+// 点が三角形の内部にあるかを確認する関数
+bool IsPointInTriangle(const Triangle& triangle, const Vector3& point) {
+	Vector3 edge1 = Subtract(triangle.vertices[1], triangle.vertices[0]);
+	Vector3 edge2 = Subtract(triangle.vertices[2], triangle.vertices[1]);
+	Vector3 edge3 = Subtract(triangle.vertices[0], triangle.vertices[2]);
+
+	Vector3 v0p = Subtract(point, triangle.vertices[0]);
+	Vector3 v1p = Subtract(point, triangle.vertices[1]);
+	Vector3 v2p = Subtract(point, triangle.vertices[2]);
+
+	Vector3 cross1 = Cross(edge1, v0p);
+	Vector3 cross2 = Cross(edge2, v1p);
+	Vector3 cross3 = Cross(edge3, v2p);
+
+	Vector3 normal = Cross(edge1, Subtract(triangle.vertices[2], triangle.vertices[0]));
+
+	if (Dot(cross1, normal) >= 0.0f && Dot(cross2, normal) >= 0.0f && Dot(cross3, normal) >= 0.0f) {
+		return true;
+	}
+
+	return false;
+}
+
+// 線分が三角形と交差するかを判定する関数
+bool IsCollision(const Triangle& triangle, const Segment& segment) {
+	Vector3 intersection;
+	if (LineIntersectsPlane(triangle, segment, intersection)) {
+		if (IsPointInTriangle(triangle, intersection)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {

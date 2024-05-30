@@ -31,9 +31,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	segment.diff = {1.0f, 1.0f, 1.0f};
 
 	Triangle triangle{
-		-1.0f, 0.0f, 0.0f,
 		0.0f, 1.0f, 0.0f,
 		1.0f, 0.0f, 0.0f
+		-1.0f, 0.0f, 0.0f,
 	};
 	uint32_t triangleColor = WHITE;
 

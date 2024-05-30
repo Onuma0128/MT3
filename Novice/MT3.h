@@ -87,6 +87,8 @@ bool IsCollision(const Sphere& sphere, const Plane& plane);
 //線と平面の衝突判定
 bool IsCollision(const Segment& segment, const Plane& plane);
 //三角形と線の衝突判定
+bool LineIntersectsPlane(const Triangle& triangle, const Segment& segment, Vector3& intersection);
+bool IsPointInTriangle(const Triangle& triangle, const Vector3& point);
 bool IsCollision(const Triangle& triangle, const Segment& segment);
 
 // Grid
