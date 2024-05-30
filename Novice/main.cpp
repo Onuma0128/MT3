@@ -27,8 +27,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Segment segment{};
 	uint32_t segmentColor = WHITE;
-	segment.origin = {0.5f, 0.5f, 0.5f};
-	segment.diff = {1.0f, 1.0f, 1.0f};
+	segment.origin = {0.0f, 0.0f, 0.0f};
+	segment.diff = {0.5f, 0.5f, 0.5f};
 
 	Triangle triangle{
 		0.0f, 1.0f, 0.0f,
