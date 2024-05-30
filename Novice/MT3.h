@@ -81,6 +81,8 @@ Vector3 Perpendicular(const Vector3& vector);
 bool IsCollision(const Sphere& s1, const Sphere& s2);
 //球と平面の衝突判定
 bool IsCollision(const Sphere& sphere, const Plane& plane);
+//線と平面の衝突判定
+bool IsCollision(const Segment& segment, const Plane& plane);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);

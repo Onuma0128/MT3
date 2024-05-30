@@ -261,6 +261,20 @@ bool IsCollision(const Sphere& sphere, const Plane& plane) {
 	}
 }
 
+bool IsCollision(const Segment& segment, const Plane& plane) { 
+	float dot = Dot(plane.normal, segment.diff);
+	if (dot == 0.0f) {
+		return false;
+	}
+	float t = (plane.distance - Dot(segment.origin, plane.normal)) / dot;
+	if (t >= 0.0f && t <= 1.0f) {
+		// tが0から1の範囲内にある場合、線分が平面と交差する
+		return true;
+	}
+
+	return false; 
+}
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数

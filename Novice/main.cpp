@@ -25,9 +25,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Vector3 cameraRotate{0.26f, 0, 0};
 	Vector3 cameraPosition{0.0f,1.9f,-6.49f};
 
-	Sphere sphere{};
-	sphere = {0.12f, 0.0f, 0.0f, 0.6f};
-	uint32_t sphereColor = WHITE;
+	Segment segment{};
+	uint32_t segmentColor = WHITE;
+	segment.origin = {0.5f, 0.5f, 0.5f};
+	segment.diff = {1.0f, 1.0f, 1.0f};
 
 	Plane plane{1.0f, 2.0f, 0.0f};
 	uint32_t planeColor = WHITE;
@@ -52,21 +53,24 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
+		Vector3 start = Transform(Transform(segment.origin, worldViewProjectionMatrix), viewportMatrix);
+		Vector3 end = Transform(Transform(Add(segment.origin, segment.diff), worldViewProjectionMatrix), viewportMatrix);
+
 		ImGui::Begin("Window");
-		ImGui::DragFloat3("sphere[0].center", &sphere.center.x, 0.01f);
-		ImGui::DragFloat("sphere[0].radius", &sphere.radius, 0.01f);
 		ImGui::DragFloat3("Plane.Normal", &plane.normal.x, 0.01f);
 		ImGui::DragFloat("Plane.distance", &plane.distance, 0.01f);
+		ImGui::DragFloat3("Segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("Segment.diff", &segment.diff.x, 0.01f);
 		ImGui::DragFloat3("CameraTranslate", &cameraPosition.x, 0.01f);
 		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
 		ImGui::End();
 
 		plane.normal = Normalize(plane.normal);
 
-		if (IsCollision(sphere, plane)) {
-			sphereColor = RED;
+		if (IsCollision(segment, plane)) {
+			segmentColor = RED;
 		} else {
-			sphereColor = WHITE;
+			segmentColor = WHITE;
 		}
 
 		///
@@ -79,7 +83,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
 		DrawPlane(plane, worldViewProjectionMatrix, viewportMatrix, planeColor);
-		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, sphereColor);
+		Novice::DrawLine((int)start.x, (int)start.y, (int)end.x, (int)end.y, segmentColor);
 
 		///
 		/// ↑描画処理ここまで
