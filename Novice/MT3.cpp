@@ -275,6 +275,10 @@ bool IsCollision(const Segment& segment, const Plane& plane) {
 	return false; 
 }
 
+bool IsCollision(const Triangle& triangle, const Segment& segment) { 
+	return false; 
+}
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数
@@ -357,6 +361,14 @@ void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const 
 	Novice::DrawLine((int)points[2].x, (int)points[2].y, (int)points[1].x, (int)points[1].y, color);
 	Novice::DrawLine((int)points[1].x, (int)points[1].y, (int)points[3].x, (int)points[3].y, color);
 	Novice::DrawLine((int)points[3].x, (int)points[3].y, (int)points[0].x, (int)points[0].y, color);
+}
+
+void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) { 
+	Vector3 vertice[3]{};
+	for (int i = 0; i < 3; i++) {
+		vertice[i] = Transform(Transform(triangle.vertices[i], viewProjectionMatrix), viewportMatrix);
+	}
+	Novice::DrawTriangle((int)vertice[0].x, (int)vertice[0].y, (int)vertice[1].x, (int)vertice[1].y, (int)vertice[2].x, (int)vertice[2].y, color, kFillModeWireFrame);
 }
 
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {

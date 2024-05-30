@@ -31,6 +31,9 @@ struct Plane {
 	Vector3 normal;
 	float distance;
 };
+struct Triangle {
+	Vector3 vertices[3];
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
@@ -83,6 +86,8 @@ bool IsCollision(const Sphere& s1, const Sphere& s2);
 bool IsCollision(const Sphere& sphere, const Plane& plane);
 //線と平面の衝突判定
 bool IsCollision(const Segment& segment, const Plane& plane);
+//三角形と線の衝突判定
+bool IsCollision(const Triangle& triangle, const Segment& segment);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
@@ -90,6 +95,8 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, const Matrix4x4 viewportMatrix, uint32_t color);
 //平面の描画
 void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+//三角形の描画
+void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 // 数値表示
 static const int kColumnWidth = 60;
