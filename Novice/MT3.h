@@ -34,6 +34,10 @@ struct Plane {
 struct Triangle {
 	Vector3 vertices[3];
 };
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
@@ -90,6 +94,8 @@ bool IsCollision(const Segment& segment, const Plane& plane);
 bool LineIntersectsPlane(const Triangle& triangle, const Segment& segment, Vector3& intersection);
 bool IsPointInTriangle(const Triangle& triangle, const Vector3& point);
 bool IsCollision(const Triangle& triangle, const Segment& segment);
+//AABBとAABBの衝突判定(矩形の衝突判定)
+//bool IsCollision(const AABB& aabb1, const AABB& aabb2);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
@@ -99,6 +105,8 @@ void DrawSphere(const Sphere& sphere, const Matrix4x4& viewProjectionMatrix, con
 void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 //三角形の描画
 void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+//AABBの描画(矩形)
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 // 数値表示
 static const int kColumnWidth = 60;

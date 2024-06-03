@@ -328,6 +328,10 @@ bool IsCollision(const Triangle& triangle, const Segment& segment) {
 	return false;
 }
 
+//bool IsCollision(const AABB& aabb1, const AABB& aabb2) { 
+//
+//}
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数
@@ -418,6 +422,23 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 		vertice[i] = Transform(Transform(triangle.vertices[i], viewProjectionMatrix), viewportMatrix);
 	}
 	Novice::DrawTriangle((int)vertice[0].x, (int)vertice[0].y, (int)vertice[1].x, (int)vertice[1].y, (int)vertice[2].x, (int)vertice[2].y, color, kFillModeWireFrame);
+}
+
+void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+	AABB aabb1{};
+
+	aabb1.min = Transform(Transform(aabb.min, viewProjectionMatrix), viewportMatrix);
+	aabb1.max = Transform(Transform(aabb.max, viewProjectionMatrix), viewportMatrix);
+	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.min.y, color);
+	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.min.x, (int)aabb1.max.y, color);
+	Novice::DrawLine((int)aabb1.max.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.max.y, color);
+	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.max.y, (int)aabb1.max.x, (int)aabb1.max.y, color);
+
+	/*Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.min.y, color);
+	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.min.x, (int)aabb1.max.y, color);
+	Novice::DrawLine((int)aabb1.max.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.max.y, color);
+	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.max.y, (int)aabb1.max.x, (int)aabb1.max.y, color);*/
+
 }
 
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {
