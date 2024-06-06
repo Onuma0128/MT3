@@ -76,6 +76,8 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip,
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 // 3、ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+//
+Matrix4x4 MakeLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up);
 
 // 正射影ベクトル
 Vector3 Project(const Vector3& v1, const Vector3& v2);
@@ -95,7 +97,7 @@ bool LineIntersectsPlane(const Triangle& triangle, const Segment& segment, Vecto
 bool IsPointInTriangle(const Triangle& triangle, const Vector3& point);
 bool IsCollision(const Triangle& triangle, const Segment& segment);
 //AABBとAABBの衝突判定(矩形の衝突判定)
-//bool IsCollision(const AABB& aabb1, const AABB& aabb2);
+bool IsCollision(const AABB& a, const AABB& b);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);

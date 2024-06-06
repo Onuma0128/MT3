@@ -221,6 +221,17 @@ Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, f
 	return result;
 }
 
+Matrix4x4 MakeLookAtMatrix(const Vector3& Position, const Vector3& target, const Vector3& up) {
+	Vector3 zaxis = Normalize(Subtract(target, Position)); // 前方向
+	Vector3 xaxis = Normalize(Cross(up, zaxis));           // 右方向
+	Vector3 yaxis = Cross(zaxis, xaxis);                   // 上方向
+
+	Matrix4x4 viewMatrix = {xaxis.x, yaxis.x, zaxis.x, 0.0f, xaxis.y, yaxis.y, zaxis.y, 0.0f, xaxis.z, yaxis.z, zaxis.z, 0.0f, -Dot(xaxis, Position), -Dot(yaxis, Position), -Dot(zaxis, Position),
+	                        1.0f};
+
+	return viewMatrix;
+}
+
 Vector3 Project(const Vector3& v1, const Vector3& v2) { 
 	Vector3 b = Normalize(v2);
 	Vector3 c = Multiply(Dot(v1, b), b);
@@ -328,9 +339,15 @@ bool IsCollision(const Triangle& triangle, const Segment& segment) {
 	return false;
 }
 
-//bool IsCollision(const AABB& aabb1, const AABB& aabb2) { 
-//
-//}
+bool IsCollision(const AABB& a, const AABB& b) { 
+	if ((a.min.x <= b.max.x && a.max.x >= b.min.x) &&
+		(a.min.y <= b.max.y && a.max.y >= b.min.y) &&
+		(a.min.z <= b.max.z && a.max.z >= b.min.z)) {
+		return true;
+	}
+
+	return false;
+}
 
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
@@ -425,20 +442,38 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 }
 
 void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
-	AABB aabb1{};
+	Vector3 corners[8];
 
-	aabb1.min = Transform(Transform(aabb.min, viewProjectionMatrix), viewportMatrix);
-	aabb1.max = Transform(Transform(aabb.max, viewProjectionMatrix), viewportMatrix);
-	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.min.y, color);
-	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.min.x, (int)aabb1.max.y, color);
-	Novice::DrawLine((int)aabb1.max.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.max.y, color);
-	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.max.y, (int)aabb1.max.x, (int)aabb1.max.y, color);
+	// AABBの8つの頂点
+	corners[0] = aabb.min;
+	corners[1] = {aabb.max.x, aabb.min.y, aabb.min.z};
+	corners[2] = {aabb.min.x, aabb.max.y, aabb.min.z};
+	corners[3] = {aabb.max.x, aabb.max.y, aabb.min.z};
+	corners[4] = {aabb.min.x, aabb.min.y, aabb.max.z};
+	corners[5] = {aabb.max.x, aabb.min.y, aabb.max.z};
+	corners[6] = {aabb.min.x, aabb.max.y, aabb.max.z};
+	corners[7] = aabb.max;
+	// 変換
+	for (int i = 0; i < 8; ++i) {
+		corners[i] = Transform(Transform(corners[i], viewProjectionMatrix), viewportMatrix);
+	}
+	// 下の面の4つの線描画
+	Novice::DrawLine((int)corners[0].x, (int)corners[0].y, (int)corners[1].x, (int)corners[1].y, color);
+	Novice::DrawLine((int)corners[1].x, (int)corners[1].y, (int)corners[3].x, (int)corners[3].y, color);
+	Novice::DrawLine((int)corners[3].x, (int)corners[3].y, (int)corners[2].x, (int)corners[2].y, color);
+	Novice::DrawLine((int)corners[2].x, (int)corners[2].y, (int)corners[0].x, (int)corners[0].y, color);
 
-	/*Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.min.y, color);
-	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.min.y, (int)aabb1.min.x, (int)aabb1.max.y, color);
-	Novice::DrawLine((int)aabb1.max.x, (int)aabb1.min.y, (int)aabb1.max.x, (int)aabb1.max.y, color);
-	Novice::DrawLine((int)aabb1.min.x, (int)aabb1.max.y, (int)aabb1.max.x, (int)aabb1.max.y, color);*/
+	// 上の面の4つの線描画
+	Novice::DrawLine((int)corners[4].x, (int)corners[4].y, (int)corners[5].x, (int)corners[5].y, color);
+	Novice::DrawLine((int)corners[5].x, (int)corners[5].y, (int)corners[7].x, (int)corners[7].y, color);
+	Novice::DrawLine((int)corners[7].x, (int)corners[7].y, (int)corners[6].x, (int)corners[6].y, color);
+	Novice::DrawLine((int)corners[6].x, (int)corners[6].y, (int)corners[4].x, (int)corners[4].y, color);
 
+	// 上下を結ぶ4つの線描画
+	Novice::DrawLine((int)corners[0].x, (int)corners[0].y, (int)corners[4].x, (int)corners[4].y, color);
+	Novice::DrawLine((int)corners[1].x, (int)corners[1].y, (int)corners[5].x, (int)corners[5].y, color);
+	Novice::DrawLine((int)corners[2].x, (int)corners[2].y, (int)corners[6].x, (int)corners[6].y, color);
+	Novice::DrawLine((int)corners[3].x, (int)corners[3].y, (int)corners[7].x, (int)corners[7].y, color);
 }
 
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {
