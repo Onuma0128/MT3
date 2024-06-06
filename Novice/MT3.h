@@ -98,6 +98,8 @@ bool IsPointInTriangle(const Triangle& triangle, const Vector3& point);
 bool IsCollision(const Triangle& triangle, const Segment& segment);
 //AABBとAABBの衝突判定(矩形の衝突判定)
 bool IsCollision(const AABB& a, const AABB& b);
+//AABBと球の衝突判定
+bool IsCollision(const AABB& aabb, const Sphere& sphere);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
