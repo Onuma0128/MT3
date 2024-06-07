@@ -366,6 +366,31 @@ bool IsCollision(const AABB& aabb, const Sphere& sphere) {
 	return false;
 }
 
+bool IsCollision(const AABB& aabb, const Segment& segment) { 
+	float tXmin = (aabb.min.x - segment.origin.x) / segment.diff.x;
+	float tXmax = (aabb.max.x - segment.origin.x) / segment.diff.x;
+	float tYmin = (aabb.min.y - segment.origin.y) / segment.diff.y;
+	float tYmax = (aabb.max.y - segment.origin.y) / segment.diff.y;
+	float tZmin = (aabb.min.z - segment.origin.z) / segment.diff.z;
+	float tZmax = (aabb.max.z - segment.origin.z) / segment.diff.z;
+	
+	float tNearX = min(tXmin, tXmax);
+	float tFarX = max(tXmin, tXmax);
+	float tNearY = min(tYmin, tYmax);
+	float tFarY = max(tYmin, tYmax);
+	float tNearZ = min(tZmin, tZmax);
+	float tFarZ = max(tZmin, tZmax);
+	//AABBとの衝突点のtが小さい方
+	float tmin = max(max(tNearX, tNearY), tNearZ);
+	//AABBとの衝突点のtが大きい方
+	float tmax = min(min(tFarX, tFarY), tFarZ);
+
+	if (tmin <= tmax && tmin <= 1.0f && tmax >= 0.0f) {
+		return true;
+	}
+	return false;
+}
+
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix) {
 	const float kGridHalfWidth = 2.0f;                                      // Gridの半分の幅
 	const uint32_t kSubdivision = 10;                                       // 分割数

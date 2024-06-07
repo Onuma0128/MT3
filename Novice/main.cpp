@@ -29,13 +29,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
-	Sphere sphere{1.0f, 1.0f, 1.0f, 1.0f};
-
 	AABB aabb{
 	    .min{-0.5f, -0.5f, -0.5f},
-        .max{0.0f,  0.0f,  0.0f }
+        .max{0.5f,  0.5f,  0.5f }
     };
 	uint32_t color = WHITE;
+
+	Segment segment{
+	    .origin{-0.7f, 0.3f,  0.0f},
+        .diff{2.0f,  -0.5f, 0.0f}
+    };
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -74,8 +77,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Obj");
 		ImGui::DragFloat3("aabb.min", &aabb.min.x, 0.01f);
 		ImGui::DragFloat3("aabb.max", &aabb.max.x, 0.01f);
-		ImGui::DragFloat3("Sphere.center", &sphere.center.x, 0.01f);
-		ImGui::DragFloat("Sphere.radius", &sphere.radius, 0.01f);
+		ImGui::DragFloat3("segment.origin", &segment.origin.x, 0.01f);
+		ImGui::DragFloat3("segment.diff", &segment.diff.x, 0.01f);
 		ImGui::End();
 
 		aabb.min.x = (std::min)(aabb.min.x, aabb.max.x);
@@ -85,7 +88,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		aabb.min.z = (std::min)(aabb.min.z, aabb.max.z);
 		aabb.max.z = (std::max)(aabb.min.z, aabb.max.z);
 
-		if (IsCollision(aabb, sphere)) {
+		Vector3 start = Transform(Transform(segment.origin, worldViewProjectionMatrix), viewportMatrix);
+		Vector3 end = Transform(Transform(Add(segment.origin, segment.diff), worldViewProjectionMatrix), viewportMatrix);
+
+		if (IsCollision(aabb, segment)) {
 			color = RED;
 		} else {
 			color = WHITE;
@@ -101,7 +107,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
 		DrawAABB(aabb, worldViewProjectionMatrix, viewportMatrix, color);
-		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
+		Novice::DrawLine((int)start.x, (int)start.y, (int)end.x, (int)end.y, color);
 
 		///
 		/// ↑描画処理ここまで

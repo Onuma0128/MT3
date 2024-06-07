@@ -100,6 +100,8 @@ bool IsCollision(const Triangle& triangle, const Segment& segment);
 bool IsCollision(const AABB& a, const AABB& b);
 //AABBと球の衝突判定
 bool IsCollision(const AABB& aabb, const Sphere& sphere);
+//AABBと線の衝突判定
+bool IsCollision(const AABB& aabb, const Segment& segment);
 
 // Grid
 void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix);
