@@ -493,6 +493,41 @@ void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Mat
 	Novice::DrawLine((int)corners[3].x, (int)corners[3].y, (int)corners[7].x, (int)corners[7].y, color);
 }
 
+void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+	Vector3 corners[8]{};
+
+	// AABBの8つの頂点
+	corners[0] = {obb.center.x - obb.size.x, obb.center.y + obb.size.y, obb.center.z - obb.size.z};
+	corners[1] = {obb.center.x + obb.size.x, obb.center.y + obb.size.y, obb.center.z - obb.size.z};
+	corners[2] = {obb.center.x - obb.size.x, obb.center.y + obb.size.y, obb.center.z + obb.size.z};
+	corners[3] = {obb.center.x + obb.size.x, obb.center.y + obb.size.y, obb.center.z + obb.size.z};
+	corners[4] = {obb.center.x - obb.size.x, obb.center.y - obb.size.y, obb.center.z - obb.size.z};
+	corners[5] = {obb.center.x + obb.size.x, obb.center.y - obb.size.y, obb.center.z - obb.size.z};
+	corners[6] = {obb.center.x - obb.size.x, obb.center.y - obb.size.y, obb.center.z + obb.size.z};
+	corners[7] = {obb.center.x + obb.size.x, obb.center.y - obb.size.y, obb.center.z + obb.size.z};
+	// 変換
+	for (int i = 0; i < 8; ++i) {
+		corners[i] = Transform(Transform(corners[i], viewProjectionMatrix), viewportMatrix);
+	}
+	// 下の面の4つの線描画
+	Novice::DrawLine((int)corners[0].x, (int)corners[0].y, (int)corners[1].x, (int)corners[1].y, color);
+	Novice::DrawLine((int)corners[1].x, (int)corners[1].y, (int)corners[3].x, (int)corners[3].y, color);
+	Novice::DrawLine((int)corners[3].x, (int)corners[3].y, (int)corners[2].x, (int)corners[2].y, color);
+	Novice::DrawLine((int)corners[2].x, (int)corners[2].y, (int)corners[0].x, (int)corners[0].y, color);
+
+	// 上の面の4つの線描画
+	Novice::DrawLine((int)corners[4].x, (int)corners[4].y, (int)corners[5].x, (int)corners[5].y, color);
+	Novice::DrawLine((int)corners[5].x, (int)corners[5].y, (int)corners[7].x, (int)corners[7].y, color);
+	Novice::DrawLine((int)corners[7].x, (int)corners[7].y, (int)corners[6].x, (int)corners[6].y, color);
+	Novice::DrawLine((int)corners[6].x, (int)corners[6].y, (int)corners[4].x, (int)corners[4].y, color);
+
+	// 上下を結ぶ4つの線描画
+	Novice::DrawLine((int)corners[0].x, (int)corners[0].y, (int)corners[4].x, (int)corners[4].y, color);
+	Novice::DrawLine((int)corners[1].x, (int)corners[1].y, (int)corners[5].x, (int)corners[5].y, color);
+	Novice::DrawLine((int)corners[2].x, (int)corners[2].y, (int)corners[6].x, (int)corners[6].y, color);
+	Novice::DrawLine((int)corners[3].x, (int)corners[3].y, (int)corners[7].x, (int)corners[7].y, color);
+}
+
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {
 	Novice::ScreenPrintf(x, y, "%.02f", vector.x);
 	Novice::ScreenPrintf(x + kColumnWidth, y, "%.02f", vector.y);

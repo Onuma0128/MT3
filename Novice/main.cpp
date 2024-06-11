@@ -29,13 +29,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
-	Sphere sphere{1.0f, 1.0f, 1.0f, 1.0f};
-
-	AABB aabb{
-	    .min{-0.5f, -0.5f, -0.5f},
-        .max{0.0f,  0.0f,  0.0f }
-    };
+	Vector3 rotate{0.0f, 0.0f, 0.0f};
+	OBB obb{
+		.center{-1.0f,0.0f,0.0f},
+		.orientations = {
+			{1.0f,0.0f,0.0f},
+			{0.0f,1.0f,0.0f},
+			{0.0f,0.0f,1.0f}},
+		.size{0.5f,0.5f,0.5f}
+	};
 	uint32_t color = WHITE;
+
+	Sphere sphere{
+	    .center{0.0f, 0.0f, 0.0f},
+        .radius{0.5f}
+    };
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -65,6 +73,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
+		Matrix4x4 rotateMatrix = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
+		for (uint32_t i = 0; i < 3; ++i) {
+			obb.orientations[i].x = rotateMatrix.m[i][0];
+			obb.orientations[i].y = rotateMatrix.m[i][1];
+			obb.orientations[i].z = rotateMatrix.m[i][2];
+		}
+
 		ImGui::Begin("Camera");
 		ImGui::DragFloat("CameraDistance", &cameraDistance, 0.01f);
 		ImGui::DragFloat("CameraHorizontalAngle", &cameraHorizontalAngle, 0.01f);
@@ -72,24 +87,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::End();
 
 		ImGui::Begin("Obj");
-		ImGui::DragFloat3("aabb.min", &aabb.min.x, 0.01f);
-		ImGui::DragFloat3("aabb.max", &aabb.max.x, 0.01f);
+		ImGui::DragFloat3("size", &obb.size.x, 0.01f);
+		ImGui::DragFloat3("rotate", &rotate.x, 0.01f);
+		ImGui::DragFloat3("obb.center", &obb.center.x, 0.01f);
 		ImGui::DragFloat3("Sphere.center", &sphere.center.x, 0.01f);
 		ImGui::DragFloat("Sphere.radius", &sphere.radius, 0.01f);
 		ImGui::End();
 
-		aabb.min.x = (std::min)(aabb.min.x, aabb.max.x);
-		aabb.max.x = (std::max)(aabb.min.x, aabb.max.x);
-		aabb.min.y = (std::min)(aabb.min.y, aabb.max.y);
-		aabb.max.y = (std::max)(aabb.min.y, aabb.max.y);
-		aabb.min.z = (std::min)(aabb.min.z, aabb.max.z);
-		aabb.max.z = (std::max)(aabb.min.z, aabb.max.z);
-
-		if (IsCollision(aabb, sphere)) {
+		/*if (IsCollision(aabb, sphere)) {
 			color = RED;
 		} else {
 			color = WHITE;
-		}
+		}*/
 
 		///
 		/// ↑更新処理ここまで
@@ -100,7 +109,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		DrawAABB(aabb, worldViewProjectionMatrix, viewportMatrix, color);
+		DrawOBB(obb, worldViewProjectionMatrix, viewportMatrix, color);
 		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
 
 		///
