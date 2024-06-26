@@ -153,21 +153,36 @@ Vector3 Transform(const Vector3& vector, const Matrix4x4& matrix) {
 	return result;
 }
 
-Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
-	// 拡大縮小行列
-	Matrix4x4 m1{scale.x, 0, 0, 0, 0, scale.y, 0, 0, 0, 0, scale.z, 0, 0, 0, 0, 1};
-	// 回転行列
+Matrix4x4 MakeScaleMatrix(const Vector3 scale) {
+	Matrix4x4 result{scale.x, 0, 0, 0, 0, scale.y, 0, 0, 0, 0, scale.z, 0, 0, 0, 0, 1};
+	return result;
+}
+
+Matrix4x4 MakeRotateMatrix(const Vector3 rotate) {
 	Matrix4x4 rotateXMatrix = MakeRotateXMatrix(rotate.x);
 	Matrix4x4 rotateYMatrix = MakeRotateYMatrix(rotate.y);
 	Matrix4x4 rotateZMatrix = MakeRotateZMatrix(rotate.z);
-	Matrix4x4 m2 = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
-	// 平行移動行列
-	Matrix4x4 m3{
+	Matrix4x4 result = Multiply(rotateXMatrix, Multiply(rotateYMatrix, rotateZMatrix));
+	return result;
+}
+
+Matrix4x4 MakeTranslateMatrix(const Vector3 translate) { 
+	Matrix4x4 result{
 	    1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, translate.x, translate.y, translate.z, 1,
 	};
+	return result;
+}
+
+Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
+	// 拡大縮小行列
+	Matrix4x4 m1 = MakeScaleMatrix(scale);
+	// 回転行列
+	Matrix4x4 m2 = MakeRotateMatrix(rotate);
+	// 平行移動行列
+	Matrix4x4 m3 = MakeTranslateMatrix(translate);
 	// 合成
 	Matrix4x4 m4 = Multiply(m1, m2);
-	Matrix4x4 result = Multiply(m4, m3);
+	Matrix4x4 result = Multiply(Multiply(m1, m2), m3);
 
 	return result;
 }
@@ -376,11 +391,11 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 	Vector3 endScreenLine[11]{};
 	// 奥から手前への線を順々に引いていく
 	for (uint32_t xIndex = 0; xIndex <= kSubdivision; ++xIndex) {
-		startLine[xIndex] = {kGridEvery * (xIndex - 5.0f), -0.5f, -1.5f + kGridEvery * 10};
+		startLine[xIndex] = {kGridEvery * (xIndex - 5.0f), -0.5f, -2.0f + kGridEvery * 10};
 		Vector3 ndcVertex = Transform(startLine[xIndex], viewProjectionMatrix);
 		startScreenLine[xIndex] = Transform(ndcVertex, viewportMatrix);
 
-		endLine[xIndex] = {kGridEvery * (xIndex - 5.0f), -0.5f, -1.5f};
+		endLine[xIndex] = {kGridEvery * (xIndex - 5.0f), -0.5f, -2.0f};
 		Vector3 endVertex = Transform(endLine[xIndex], viewProjectionMatrix);
 		endScreenLine[xIndex] = Transform(endVertex, viewportMatrix);
 		if (xIndex == 5) {
@@ -391,11 +406,11 @@ void DrawGrid(const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMa
 	}
 	// 左から右への線を順々に引いていく
 	for (uint32_t zIndex = 0; zIndex <= kSubdivision; ++zIndex) {
-		startLine[zIndex] = {-kGridEvery * 5.0f, -0.5f, kGridEvery * zIndex - 1.5f};
+		startLine[zIndex] = {-kGridEvery * 5.0f, -0.5f, kGridEvery * zIndex - 2.0f};
 		Vector3 ndcVertex = Transform(startLine[zIndex], viewProjectionMatrix);
 		startScreenLine[zIndex] = Transform(ndcVertex, viewportMatrix);
 
-		endLine[zIndex] = {kGridEvery * 5.0f, -0.5f, kGridEvery * zIndex - 1.5f};
+		endLine[zIndex] = {kGridEvery * 5.0f, -0.5f, kGridEvery * zIndex - 2.0f};
 		Vector3 endVertex = Transform(endLine[zIndex], viewProjectionMatrix);
 		endScreenLine[zIndex] = Transform(endVertex, viewportMatrix);
 		if (zIndex == 5) {
@@ -497,16 +512,31 @@ void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix
 	Vector3 corners[8]{};
 
 	// AABBの8つの頂点
-	corners[0] = {obb.center.x - obb.size.x, obb.center.y + obb.size.y, obb.center.z - obb.size.z};
-	corners[1] = {obb.center.x + obb.size.x, obb.center.y + obb.size.y, obb.center.z - obb.size.z};
-	corners[2] = {obb.center.x - obb.size.x, obb.center.y + obb.size.y, obb.center.z + obb.size.z};
-	corners[3] = {obb.center.x + obb.size.x, obb.center.y + obb.size.y, obb.center.z + obb.size.z};
-	corners[4] = {obb.center.x - obb.size.x, obb.center.y - obb.size.y, obb.center.z - obb.size.z};
-	corners[5] = {obb.center.x + obb.size.x, obb.center.y - obb.size.y, obb.center.z - obb.size.z};
-	corners[6] = {obb.center.x - obb.size.x, obb.center.y - obb.size.y, obb.center.z + obb.size.z};
-	corners[7] = {obb.center.x + obb.size.x, obb.center.y - obb.size.y, obb.center.z + obb.size.z};
+	corners[0] = {-obb.size.x, +obb.size.y, -obb.size.z};
+	corners[1] = {+obb.size.x, +obb.size.y, -obb.size.z};
+	corners[2] = {-obb.size.x, +obb.size.y, +obb.size.z};
+	corners[3] = {+obb.size.x, +obb.size.y, +obb.size.z};
+	corners[4] = {-obb.size.x, -obb.size.y, -obb.size.z};
+	corners[5] = {+obb.size.x, -obb.size.y, -obb.size.z};
+	corners[6] = {-obb.size.x, -obb.size.y, +obb.size.z};
+	corners[7] = {+obb.size.x, -obb.size.y, +obb.size.z};
+
+	Matrix4x4 rotateMatrix{
+		1,0,0,0,
+		0,1,0,0,
+		0,0,1,0,
+		0,0,0,1
+	};
+	for (uint32_t i = 0; i < 3; ++i) {
+		rotateMatrix.m[i][0] = obb.orientations[i].x;
+		rotateMatrix.m[i][1] = obb.orientations[i].y;
+		rotateMatrix.m[i][2] = obb.orientations[i].z;
+	}
+
 	// 変換
 	for (int i = 0; i < 8; ++i) {
+		corners[i] = Transform(corners[i], rotateMatrix);
+		corners[i] = Add(corners[i], obb.center);
 		corners[i] = Transform(Transform(corners[i], viewProjectionMatrix), viewportMatrix);
 	}
 	// 下の面の4つの線描画

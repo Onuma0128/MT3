@@ -70,6 +70,9 @@ Vector3 Multiply(float scalar, const Vector3& v);
 // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 // 3次元アフィン変換
+Matrix4x4 MakeScaleMatrix(const Vector3 scale);
+Matrix4x4 MakeRotateMatrix(const Vector3 rotate);
+Matrix4x4 MakeTranslateMatrix(const Vector3 translate);
 Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
 // クロス積

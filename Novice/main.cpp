@@ -80,6 +80,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			obb.orientations[i].z = rotateMatrix.m[i][2];
 		}
 
+		// obbWorldMatrixInverseの計算
+		Matrix4x4 obbTranslateMatrix = MakeTranslateMatrix(obb.center);
+		Matrix4x4 obbRotateMatrix = rotateMatrix;
+		Matrix4x4 obbScaleMatrix = MakeScaleMatrix(obb.size);
+		Matrix4x4 obbWorldMatrix = Multiply(Multiply(obbScaleMatrix, obbRotateMatrix), obbTranslateMatrix);
+		Matrix4x4 obbWorldMatrixInverse = Inverse(obbWorldMatrix);
+
+		Vector3 centerInOBBLocalSpace = Transform(sphere.center, obbWorldMatrixInverse);
+		AABB aabbOBBLocal{
+		    .min{-obb.size.x, -obb.size.y, -obb.size.z},
+            .max{obb.size.x,  obb.size.y,  obb.size.z }
+        };
+		Sphere sphereOBBLocal{
+			.center {Multiply(0.5f,centerInOBBLocalSpace)},
+			.radius{sphere.radius}
+		};
+		// ローカル空間での衝突判定
+		if (IsCollision(aabbOBBLocal, sphereOBBLocal)) {
+			color = RED;
+		} else {
+			color = WHITE;
+		}
+
 		ImGui::Begin("Camera");
 		ImGui::DragFloat("CameraDistance", &cameraDistance, 0.01f);
 		ImGui::DragFloat("CameraHorizontalAngle", &cameraHorizontalAngle, 0.01f);
@@ -92,13 +115,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("obb.center", &obb.center.x, 0.01f);
 		ImGui::DragFloat3("Sphere.center", &sphere.center.x, 0.01f);
 		ImGui::DragFloat("Sphere.radius", &sphere.radius, 0.01f);
+		ImGui::DragFloat3("SphereOBBLocal", &sphereOBBLocal.center.x, 0.01f);
 		ImGui::End();
-
-		/*if (IsCollision(aabb, sphere)) {
-			color = RED;
-		} else {
-			color = WHITE;
-		}*/
 
 		///
 		/// ↑更新処理ここまで
