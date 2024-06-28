@@ -29,21 +29,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
-	Vector3 rotate{0.0f, 0.0f, 0.0f};
-	OBB obb{
-		.center{-1.0f,0.0f,0.0f},
-		.orientations = {
-			{1.0f,0.0f,0.0f},
-			{0.0f,1.0f,0.0f},
-			{0.0f,0.0f,1.0f}},
-		.size{0.5f,0.5f,0.5f}
+	Vector3 controlPoints[3] = {
+	    {-0.8f, 0.58f, 1.0f },
+	    {1.76f, 1.0f,  -0.3f},
+	    {0.94f, -0.7f, 2.3f },
 	};
-	uint32_t color = WHITE;
 
-	Sphere sphere{
-	    .center{0.0f, 0.0f, 0.0f},
-        .radius{0.5f}
-    };
+	Sphere sphere[3]{};
+	uint32_t color = BLACK;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -73,35 +66,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
-		Matrix4x4 rotateMatrix = Multiply(MakeRotateXMatrix(rotate.x), Multiply(MakeRotateYMatrix(rotate.y), MakeRotateZMatrix(rotate.z)));
-		for (uint32_t i = 0; i < 3; ++i) {
-			obb.orientations[i].x = rotateMatrix.m[i][0];
-			obb.orientations[i].y = rotateMatrix.m[i][1];
-			obb.orientations[i].z = rotateMatrix.m[i][2];
-		}
-
-		// obbWorldMatrixInverseの計算
-		Matrix4x4 obbTranslateMatrix = MakeTranslateMatrix(obb.center);
-		Matrix4x4 obbRotateMatrix = rotateMatrix;
-		Matrix4x4 obbScaleMatrix = MakeScaleMatrix(obb.size);
-		Matrix4x4 obbWorldMatrixInverse = Inverse(Multiply(Multiply(obbScaleMatrix, obbRotateMatrix), obbTranslateMatrix));
-
-		Vector3 centerInOBBLocalSpace = Transform(sphere.center, obbWorldMatrixInverse);
-		Vector3 halfSize = Multiply(3.0f, obb.size);
-		AABB aabbOBBLocal{
-		    .min{-halfSize.x, -halfSize.y, -halfSize.z},
-            .max{halfSize.x,  halfSize.y,  halfSize.z }
-        };
-
-		Sphere sphereOBBLocal{
-			.center = centerInOBBLocalSpace,
-			.radius = sphere.radius
-		};
-		// ローカル空間での衝突判定
-		if (IsCollision(aabbOBBLocal, sphereOBBLocal)) {
-			color = RED;
-		} else {
-			color = WHITE;
+		for (int i = 0; i < 3; i++) {
+			sphere[i].center = controlPoints[i];
+			sphere[i].radius = 0.01f;
 		}
 
 		ImGui::Begin("Camera");
@@ -110,13 +77,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat("CameraVerticalAngle", &cameraVerticalAngle, 0.01f);
 		ImGui::End();
 
-		ImGui::Begin("Obj");
-		ImGui::DragFloat3("size", &obb.size.x, 0.01f);
-		ImGui::DragFloat3("rotate", &rotate.x, 0.01f);
-		ImGui::DragFloat3("obb.center", &obb.center.x, 0.01f);
-		ImGui::DragFloat3("Sphere.center", &sphere.center.x, 0.01f);
-		ImGui::DragFloat("Sphere.radius", &sphere.radius, 0.01f);
-		ImGui::DragFloat3("SphereOBBLocal", &sphereOBBLocal.center.x, 0.01f);
+		ImGui::Begin("Bezier");
+		ImGui::DragFloat3("controlPoints0", &controlPoints[0].x, 0.01f);
+		ImGui::DragFloat3("controlPoints1", &controlPoints[1].x, 0.01f);
+		ImGui::DragFloat3("controlPoints2", &controlPoints[2].x, 0.01f);
 		ImGui::End();
 
 		///
@@ -128,11 +92,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		DrawOBB(obb, worldViewProjectionMatrix, viewportMatrix, color);
-		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
-
-		DrawAABB(aabbOBBLocal, worldViewProjectionMatrix, viewportMatrix, 0x00FF00FF);
-		DrawSphere(sphereOBBLocal, worldViewProjectionMatrix, viewportMatrix, 0x00FF00FF);
+		for (int i = 0; i < 3; i++) {
+			DrawSphere(sphere[i], worldViewProjectionMatrix, viewportMatrix, color);
+		}
+		DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], worldViewProjectionMatrix, viewportMatrix, BLUE);
 
 		///
 		/// ↑描画処理ここまで

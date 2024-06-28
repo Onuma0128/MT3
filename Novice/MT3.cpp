@@ -115,6 +115,14 @@ Vector3 Multiply(float scalar, const Vector3& v) {
 	return result;
 }
 
+Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t) { 
+	Vector3 result{};
+	result.x = (1.0f - t) * v1.x + v2.x * t;
+	result.y = (1.0f - t) * v1.y + v2.y * t;
+	result.z = (1.0f - t) * v1.z + v2.z * t;
+	return result;
+}
+
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2) {
 	Matrix4x4 result{};
 	result.m[0][0] = m1.m[0][0] * m2.m[0][0] + m1.m[0][1] * m2.m[1][0] + m1.m[0][2] * m2.m[2][0] + m1.m[0][3] * m2.m[3][0];
@@ -556,6 +564,28 @@ void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix
 	Novice::DrawLine((int)corners[1].x, (int)corners[1].y, (int)corners[5].x, (int)corners[5].y, color);
 	Novice::DrawLine((int)corners[2].x, (int)corners[2].y, (int)corners[6].x, (int)corners[6].y, color);
 	Novice::DrawLine((int)corners[3].x, (int)corners[3].y, (int)corners[7].x, (int)corners[7].y, color);
+}
+
+void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2,
+	const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+	float t = 0.0f;
+	while (t < 1.0f) {
+		// 今の座標
+		Vector3 p0p1 = Lerp(controlPoint0, controlPoint1, t);
+		Vector3 p1p2 = Lerp(controlPoint1, controlPoint2, t);
+		Vector3 p = Lerp(p0p1, p1p2, t);
+		// 1つ先の座標
+		p0p1 = Lerp(controlPoint0, controlPoint1, (t + 0.1f));
+		p1p2 = Lerp(controlPoint1, controlPoint2, (t + 0.1f));
+		Vector3 p1 = Lerp(p0p1, p1p2, (t + 0.1f));
+
+		p = Transform(Transform(p, viewProjectionMatrix), viewportMatrix);
+		p1 = Transform(Transform(p1, viewProjectionMatrix), viewportMatrix);
+
+		Novice::DrawLine((int)p.x, (int)p.y, (int)p1.x, (int)p1.y, color);
+		t += 0.1f;
+	}
+
 }
 
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {

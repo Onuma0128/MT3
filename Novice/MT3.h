@@ -67,6 +67,8 @@ float Length(const Vector3& v);
 Vector3 Normalize(const Vector3& v);
 // スカラー倍
 Vector3 Multiply(float scalar, const Vector3& v);
+// ラープ関数
+Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
 // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 // 3次元アフィン変換
@@ -121,6 +123,9 @@ void DrawTriangle(const Triangle& triangle, const Matrix4x4& viewProjectionMatri
 void DrawAABB(const AABB& aabb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 //OBBの描画
 void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+//ベジエ曲線の描画
+void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2,
+	 const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 // 数値表示
 static const int kColumnWidth = 60;
