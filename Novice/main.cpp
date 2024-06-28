@@ -84,17 +84,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 obbTranslateMatrix = MakeTranslateMatrix(obb.center);
 		Matrix4x4 obbRotateMatrix = rotateMatrix;
 		Matrix4x4 obbScaleMatrix = MakeScaleMatrix(obb.size);
-		Matrix4x4 obbWorldMatrix = Multiply(Multiply(obbScaleMatrix, obbRotateMatrix), obbTranslateMatrix);
-		Matrix4x4 obbWorldMatrixInverse = Inverse(obbWorldMatrix);
+		Matrix4x4 obbWorldMatrixInverse = Inverse(Multiply(Multiply(obbScaleMatrix, obbRotateMatrix), obbTranslateMatrix));
 
 		Vector3 centerInOBBLocalSpace = Transform(sphere.center, obbWorldMatrixInverse);
+		Vector3 halfSize = Multiply(3.0f, obb.size);
 		AABB aabbOBBLocal{
-		    .min{-obb.size.x, -obb.size.y, -obb.size.z},
-            .max{obb.size.x,  obb.size.y,  obb.size.z }
+		    .min{-halfSize.x, -halfSize.y, -halfSize.z},
+            .max{halfSize.x,  halfSize.y,  halfSize.z }
         };
+
 		Sphere sphereOBBLocal{
-			.center {Multiply(0.5f,centerInOBBLocalSpace)},
-			.radius{sphere.radius}
+			.center = centerInOBBLocalSpace,
+			.radius = sphere.radius
 		};
 		// ローカル空間での衝突判定
 		if (IsCollision(aabbOBBLocal, sphereOBBLocal)) {
@@ -129,6 +130,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
 		DrawOBB(obb, worldViewProjectionMatrix, viewportMatrix, color);
 		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
+
+		DrawAABB(aabbOBBLocal, worldViewProjectionMatrix, viewportMatrix, 0x00FF00FF);
+		DrawSphere(sphereOBBLocal, worldViewProjectionMatrix, viewportMatrix, 0x00FF00FF);
 
 		///
 		/// ↑描画処理ここまで
