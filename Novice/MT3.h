@@ -80,6 +80,11 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 // クロス積
 Vector3 Cross(const Vector3& v1, const Vector3& v2);
 
+//行列の足し算
+Matrix4x4 Add(const Matrix4x4& m1, const Matrix4x4& m2);
+//行列の引き算
+Matrix4x4 Subtract(const Matrix4x4& m1, const Matrix4x4& m2);
+
 // 1、投資投影行列
 Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip, float farClip);
 // 2、正射影行列
@@ -132,3 +137,13 @@ void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, cons
 // 数値表示
 static const int kColumnWidth = 60;
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label);
+
+//二項演算子
+Vector3 operator+(const Vector3& v1, const Vector3& v2);
+Vector3 operator-(const Vector3& v1, const Vector3& v2);
+Vector3 operator*(float s, const Vector3& v);
+Vector3 operator*(const Vector3& v, float s);
+
+Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2);
+Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2);
+Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2);
