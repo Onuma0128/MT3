@@ -181,7 +181,7 @@ Matrix4x4 MakeTranslateMatrix(const Vector3 translate) {
 	return result;
 }
 
-Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
 	// 拡大縮小行列
 	Matrix4x4 m1 = MakeScaleMatrix(scale);
 	// 回転行列
@@ -254,6 +254,16 @@ Matrix4x4 MakeLookAtMatrix(const Vector3& Position, const Vector3& target, const
 	                        1.0f};
 
 	return viewMatrix;
+}
+
+Matrix4x4 MakeIdentityMatrix() {
+	Matrix4x4 result{
+		1.0f,0.0f,0.0f,0.0f,
+		0.0f,1.0f,0.0f,0.0f,
+		0.0f,0.0f,1.0f,0.0f,
+		0.0f,0.0f,0.0f,1.0f
+	};
+	return result;
 }
 
 Vector3 Project(const Vector3& v1, const Vector3& v2) { 

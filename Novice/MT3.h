@@ -75,7 +75,7 @@ Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 Matrix4x4 MakeScaleMatrix(const Vector3 scale);
 Matrix4x4 MakeRotateMatrix(const Vector3 rotate);
 Matrix4x4 MakeTranslateMatrix(const Vector3 translate);
-Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
 // クロス積
 Vector3 Cross(const Vector3& v1, const Vector3& v2);
@@ -88,6 +88,8 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float botto
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
 //
 Matrix4x4 MakeLookAtMatrix(const Vector3& eye, const Vector3& target, const Vector3& up);
+//
+Matrix4x4 MakeIdentityMatrix();
 
 // 正射影ベクトル
 Vector3 Project(const Vector3& v1, const Vector3& v2);
