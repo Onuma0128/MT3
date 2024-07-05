@@ -44,8 +44,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	    {1.0f, 1.0f, 1.0f},
 	    {1.0f, 1.0f, 1.0f}
 	};
-
-	Sphere sphere[3]{};
 	uint32_t color[3]{RED, GREEN, BLUE};
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -82,12 +80,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat("CameraVerticalAngle", &cameraVerticalAngle, 0.01f);
 		ImGui::End();
 
-		Matrix4x4 sphereWorldMatrix[3]{};
-		for (int i = 0; i < 3; ++i) {
-			sphereWorldMatrix[i] = MakeAffineMatrix(scales[i], rotates[i], translates[i]);
-			sphere[i].center = Transform(sphere[i].center, sphereWorldMatrix[i]);
-			sphere[i].radius = 0.1f;
-		}
+		Matrix4x4 shoulderMatrix = MakeAffineMatrix(scales[0], rotates[0], translates[0]);
+		Matrix4x4 elbowMatrix = MakeAffineMatrix(scales[1], rotates[1], translates[1]);
+		Matrix4x4 handMatrix = MakeAffineMatrix(scales[2], rotates[2], translates[2]);
+
+		Matrix4x4 shoulderWorldMatrix = shoulderMatrix;
+		Matrix4x4 elbowWorldMatrix = Multiply(elbowMatrix, shoulderWorldMatrix);
+		Matrix4x4 handWorldMatrix = Multiply(handMatrix, elbowWorldMatrix);
+
+		Vector3 shoulderPosition = {shoulderWorldMatrix.m[3][0], shoulderWorldMatrix.m[3][1], shoulderWorldMatrix.m[3][2]};
+		Vector3 elbowPosition = {elbowWorldMatrix.m[3][0], elbowWorldMatrix.m[3][1], elbowWorldMatrix.m[3][2]};
+		Vector3 handPosition = {handWorldMatrix.m[3][0], handWorldMatrix.m[3][1], handWorldMatrix.m[3][2]};
+
+		Vector3 shoulderPositionP = Transform(Transform(shoulderPosition, worldViewProjectionMatrix), viewportMatrix);
+		Vector3 elbowPositionP = Transform(Transform(elbowPosition, worldViewProjectionMatrix), viewportMatrix);
+		Vector3 handPositionP = Transform(Transform(handPosition, worldViewProjectionMatrix), viewportMatrix);
 
 		ImGui::Begin("Spheres");
 		//0
@@ -113,9 +120,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		for (int i = 0; i < 3; ++i) {
-			DrawSphere(sphere[i], worldViewProjectionMatrix, viewportMatrix, color[i]);
-		}
+		Novice::DrawLine((int)shoulderPositionP.x, (int)shoulderPositionP.y, (int)elbowPositionP.x, (int)elbowPositionP.y, WHITE);
+		Novice::DrawLine((int)elbowPositionP.x, (int)elbowPositionP.y, (int)handPositionP.x, (int)handPositionP.y, WHITE);
+		DrawSphere({shoulderPosition, 0.1f}, worldViewProjectionMatrix, viewportMatrix, color[0]);
+		DrawSphere({elbowPosition, 0.1f}, worldViewProjectionMatrix, viewportMatrix, color[1]);
+		DrawSphere({handPosition, 0.1f}, worldViewProjectionMatrix, viewportMatrix, color[2]);
 
 		///
 		/// ↑描画処理ここまで
