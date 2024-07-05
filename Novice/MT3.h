@@ -43,6 +43,20 @@ struct OBB {
 	Vector3 orientations[3];
 	Vector3 size;
 };
+struct Spring {
+	Vector3 anchor;
+	float naturalLength;
+	float stiffness;
+	float dampingCoefficient;
+};
+struct Ball {
+	Vector3 position;
+	Vector3 velocity;
+	Vector3 acceleration;
+	float mass;
+	float radius;
+	unsigned int color;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
@@ -143,6 +157,7 @@ Vector3 operator+(const Vector3& v1, const Vector3& v2);
 Vector3 operator-(const Vector3& v1, const Vector3& v2);
 Vector3 operator*(float s, const Vector3& v);
 Vector3 operator*(const Vector3& v, float s);
+Vector3 operator/(const Vector3& v, float s);
 
 Matrix4x4 operator+(const Matrix4x4& m1, const Matrix4x4& m2);
 Matrix4x4 operator-(const Matrix4x4& m1, const Matrix4x4& m2);
