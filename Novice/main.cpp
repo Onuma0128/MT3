@@ -30,16 +30,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraVerticalAngle = 0.26f;
 
 	Spring spring{};
-	spring.anchor = {0.0f, 0.0f, 0.0f};
-	spring.naturalLength = 1.0f;
+	spring.anchor = {0.0f, 1.0f, 0.0f};
+	spring.naturalLength = 0.7f;
 	spring.stiffness = 100.0f;
 	spring.dampingCoefficient = 2.0f;
 
 	Ball ball{};
-	ball.position = {1.2f, 0.0f, 0.0f};
+	ball.position = {0.8f, 0.2f, 0.0f};
 	ball.mass = 2.0f;
 	ball.radius = 0.05f;
 	ball.color = BLUE;
+
+	const Vector3 kGravity{0.0f, -9.8f, 0.0f};
 
 	Sphere sphere{};
 
@@ -91,6 +93,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Vector3 dampingForce = -spring.dampingCoefficient * ball.velocity;
 			Vector3 force = restoringForce + dampingForce;
 			ball.acceleration = force / ball.mass;
+			// 重力を加える
+			Vector3 gravityForce = kGravity * ball.mass;
+			Vector3 totalForce = force + gravityForce;
+			ball.acceleration = totalForce / ball.mass;
 		}
 		ball.velocity = ball.acceleration * deltaTime + ball.velocity;
 		ball.position = ball.velocity * deltaTime + ball.position;
