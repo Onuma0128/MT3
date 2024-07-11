@@ -588,9 +588,52 @@ void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, cons
 
 }
 
+void DrawCatmullRom(
+    const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2, const Vector3& controlPoint3,
+    const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color) {
+	const float s = 0.5f;
+	float t = 0.0f;
+	while (t < 1.0f) {
+		float t2 = t * t;
+		float t3 = t2 * t;
+
+		// 各項の計算
+		Vector3 e3 = -controlPoint0 + 3.0f * controlPoint1 - 3.0f * controlPoint2 + controlPoint3;
+		Vector3 e2 = 2.0f * controlPoint0 - 5.0f * controlPoint1 + 4.0f * controlPoint2 - controlPoint3;
+		Vector3 e1 = -controlPoint0 + controlPoint2;
+		Vector3 e0 = 2.0f * controlPoint1;
+
+		// 補間結果の計算
+		Vector3 p = (e3 * t3 + e2 * t2 + e1 * t + e0) * s;
+
+		// 次の点の計算
+		float tNext = t + 0.1f;
+		float tNext2 = tNext * tNext;
+		float tNext3 = tNext2 * tNext;
+
+		Vector3 pNext = (e3 * tNext3 + e2 * tNext2 + e1 * tNext + e0) * s;
+
+		// 現在の点と次の点を変換
+		p = Transform(Transform(p, viewProjectionMatrix), viewportMatrix);
+		pNext = Transform(Transform(pNext, viewProjectionMatrix), viewportMatrix);
+
+		// 線を描画
+		Novice::DrawLine((int)p.x, (int)p.y, (int)pNext.x, (int)pNext.y, color);
+
+		t += 0.1f;
+	}
+}
+
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label) {
 	Novice::ScreenPrintf(x, y, "%.02f", vector.x);
 	Novice::ScreenPrintf(x + kColumnWidth, y, "%.02f", vector.y);
 	Novice::ScreenPrintf(x + kColumnWidth * 2, y, "%.02f", vector.z);
 	Novice::ScreenPrintf(x + kColumnWidth * 3, y, "%s", label);
 }
+
+Vector3 operator+(const Vector3& v1, const Vector3& v2) { return Add(v1, v2); }
+Vector3 operator-(const Vector3& v1, const Vector3& v2) { return Subtract(v1, v2); }
+Vector3 operator*(float s, const Vector3& v) { return Multiply(s, v); }
+Vector3 operator*(const Vector3& v, float s) { return s * v; }
+
+Vector3 operator-(const Vector3& v) { return {-v.x, -v.y, -v.z}; }

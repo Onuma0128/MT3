@@ -29,13 +29,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
-	Vector3 controlPoints[3] = {
-	    {-0.8f, 0.58f, 1.0f },
-	    {1.76f, 1.0f,  -0.3f},
-	    {0.94f, -0.7f, 2.3f },
-	};
+	Vector3 controlPoints[4] = {
+	    {-0.8f,  0.58f,  1.0f  },
+        {1.76f,  1.0f,   -0.3f },
+        {0.94f,  -0.7f,  2.3f  },
+        {-0.53f, -0.26f, -0.15f}
+    };
 
-	Sphere sphere[3]{};
+	Sphere sphere[4]{};
 	uint32_t color = BLACK;
 
 	// ウィンドウの×ボタンが押されるまでループ
@@ -66,7 +67,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 4; i++) {
 			sphere[i].center = controlPoints[i];
 			sphere[i].radius = 0.01f;
 		}
@@ -81,6 +82,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("controlPoints0", &controlPoints[0].x, 0.01f);
 		ImGui::DragFloat3("controlPoints1", &controlPoints[1].x, 0.01f);
 		ImGui::DragFloat3("controlPoints2", &controlPoints[2].x, 0.01f);
+		ImGui::DragFloat3("controlPoints3", &controlPoints[3].x, 0.01f);
 		ImGui::End();
 
 		///
@@ -92,10 +94,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		for (int i = 0; i < 3; i++) {
+		for (int i = 0; i < 4; i++) {
 			DrawSphere(sphere[i], worldViewProjectionMatrix, viewportMatrix, color);
 		}
-		DrawBezier(controlPoints[0], controlPoints[1], controlPoints[2], worldViewProjectionMatrix, viewportMatrix, BLUE);
+		DrawCatmullRom(controlPoints[0], controlPoints[0], controlPoints[1], controlPoints[2] ,worldViewProjectionMatrix, viewportMatrix, BLUE);
+		DrawCatmullRom(controlPoints[0], controlPoints[1], controlPoints[2], controlPoints[3], worldViewProjectionMatrix, viewportMatrix, BLUE);
+		DrawCatmullRom(controlPoints[1], controlPoints[2], controlPoints[3], controlPoints[3], worldViewProjectionMatrix, viewportMatrix, BLUE);
 
 		///
 		/// ↑描画処理ここまで

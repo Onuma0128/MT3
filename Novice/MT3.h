@@ -126,7 +126,18 @@ void DrawOBB(const OBB& obb, const Matrix4x4& viewProjectionMatrix, const Matrix
 //ベジエ曲線の描画
 void DrawBezier(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2,
 	 const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
+// スプライン曲線
+void DrawCatmullRom(const Vector3& controlPoint0, const Vector3& controlPoint1, const Vector3& controlPoint2, const Vector3& controlPoint3,
+     const Matrix4x4& viewProjectionMatrix, const Matrix4x4& viewportMatrix, uint32_t color);
 
 // 数値表示
 static const int kColumnWidth = 60;
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label);
+
+// 二項演算子
+Vector3 operator+(const Vector3& v1, const Vector3& v2);
+Vector3 operator-(const Vector3& v1, const Vector3& v2);
+Vector3 operator*(float s, const Vector3& v);
+Vector3 operator*(const Vector3& v, float s);
+
+Vector3 operator-(const Vector3& v);
