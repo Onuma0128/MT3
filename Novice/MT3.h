@@ -57,6 +57,13 @@ struct Ball {
 	float radius;
 	unsigned int color;
 };
+struct Pendulum {
+	Vector3 anchor;
+	float length;
+	float angle;
+	float angularVelocity;
+	float angularAcceleration;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);

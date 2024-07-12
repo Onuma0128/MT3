@@ -29,17 +29,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
+	Pendulum pendulum;
+	pendulum.anchor = {0.0f, 1.0f, 0.0f};
+	pendulum.length = 1.25f;
+	pendulum.angle = 0.7f;
+	pendulum.angularVelocity = 0.0f;
+	pendulum.angularAcceleration = 0.0f;
+
 	Sphere sphere{
-	    .center = {0.8f, -0.5f, 0},
-        .radius = 0.1f
+	    .center = {0.8f, 0.0f, 0.0f},
+        .radius = 0.08f
     };
 	uint32_t color = WHITE;
 
 	float deltaTime = 1.0f / 60.0f;
-
-	float angularVelocity = 3.14f;
-	float angle = 0.0f;
-	float r = 0.8f;
 
 	bool start = false;
 
@@ -82,11 +85,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::End();
 
 		if (start) {
-			angle += angularVelocity * deltaTime;
+			pendulum.angularAcceleration = 
+				-(9.8f / pendulum.length) * std::sin(pendulum.angle);
+			pendulum.angularVelocity += pendulum.angularAcceleration * deltaTime;
+			pendulum.angle += pendulum.angularVelocity * deltaTime;
 
-			sphere.center.x = std::cos(angle) * r;
-			sphere.center.y = std::sin(angle) * r - 0.5f;
+			sphere.center.x = pendulum.anchor.x + std::sin(pendulum.angle) * pendulum.length;
+			sphere.center.y = pendulum.anchor.y - std::cos(pendulum.angle) * pendulum.length;
+			sphere.center.z = pendulum.anchor.z;
 		}
+
+		Vector3 p0, p1;
+		p0 = Transform(Transform(pendulum.anchor, worldViewProjectionMatrix), viewportMatrix);
+		p1 = Transform(Transform(sphere.center, worldViewProjectionMatrix), viewportMatrix);
 
 		///
 		/// ↑更新処理ここまで
@@ -97,6 +108,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
+		Novice::DrawLine((int)p0.x, (int)p0.y, (int)p1.x, (int)p1.y, color);
 		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
 
 		///
