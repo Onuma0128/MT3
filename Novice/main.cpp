@@ -29,23 +29,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
-	Spring spring{};
-	spring.anchor = {0.0f, 0.0f, 0.0f};
-	spring.naturalLength = 1.0f;
-	spring.stiffness = 100.0f;
-	spring.dampingCoefficient = 2.0f;
-
-	Ball ball{};
-	ball.position = {1.2f, 0.0f, 0.0f};
-	ball.mass = 2.0f;
-	ball.radius = 0.05f;
-	ball.color = BLUE;
-
-	Sphere sphere{};
+	Sphere sphere{
+	    .center = {0.8f, -0.5f, 0},
+        .radius = 0.1f
+    };
+	uint32_t color = WHITE;
 
 	float deltaTime = 1.0f / 60.0f;
 
-	Vector3 position[2]{};
+	float angularVelocity = 3.14f;
+	float angle = 0.0f;
+	float r = 0.8f;
+
+	bool start = false;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -81,25 +77,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat("CameraVerticalAngle", &cameraVerticalAngle, 0.01f);
 		ImGui::End();
 
-		Vector3 diff = ball.position - spring.anchor;
-		float length = Length(diff);
-		if (length != 0.0f) {
-			Vector3 direction = Normalize(diff);
-			Vector3 restPosition = spring.anchor + direction * spring.naturalLength;
-			Vector3 disolacement = length * (ball.position - restPosition);
-			Vector3 restoringForce = -spring.stiffness * disolacement;
-			Vector3 dampingForce = -spring.dampingCoefficient * ball.velocity;
-			Vector3 force = restoringForce + dampingForce;
-			ball.acceleration = force / ball.mass;
+		ImGui::Begin("Sphere");
+		ImGui::Checkbox("Start", &start);
+		ImGui::End();
+
+		if (start) {
+			angle += angularVelocity * deltaTime;
+
+			sphere.center.x = std::cos(angle) * r;
+			sphere.center.y = std::sin(angle) * r - 0.5f;
 		}
-		ball.velocity = ball.acceleration * deltaTime + ball.velocity;
-		ball.position = ball.velocity * deltaTime + ball.position;
-
-		sphere.center = ball.position;
-		sphere.radius = ball.radius;
-
-		position[0] = Transform(Transform(spring.anchor, worldViewProjectionMatrix), viewportMatrix);
-		position[1] = Transform(Transform(sphere.center, worldViewProjectionMatrix), viewportMatrix);
 
 		///
 		/// ↑更新処理ここまで
@@ -110,8 +97,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
-		Novice::DrawLine((int)position[0].x, (int)position[0].y, (int)position[1].x, (int)position[1].y, WHITE);
-		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, ball.color);
+		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, color);
 
 		///
 		/// ↑描画処理ここまで
