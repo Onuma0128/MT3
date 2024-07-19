@@ -23,14 +23,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Vector3 cameraScale{1, 1, 1};
 	Vector3 cameraRotate{0.26f, 0, 0};
-	Vector3 cameraPosition{0.0f,1.9f,-6.49f};
+	Vector3 cameraPosition{0.0f, 1.9f, -6.49f};
 
-	Sphere sphere{};
-	sphere = {0.12f, 0.0f, 0.0f, 0.6f};
-	uint32_t sphereColor = WHITE;
+	float cameraDistance = 10.0f;
+	float cameraHorizontalAngle = -1.575f;
+	float cameraVerticalAngle = 0.26f;
 
-	Plane plane{1.0f, 2.0f, 0.0f};
+	Plane plane{};
+	plane.normal = Normalize({-0.2f, 0.9f, -0.3f});
+	plane.distance = 0.0f;
 	uint32_t planeColor = WHITE;
+
+	Ball ball{};
+	ball.position = {0.8f, 1.2f, 0.3f};
+	ball.acceleration = {0.0f, -9.8f, 0.0f};
+	ball.mass = 2.0f;
+	ball.radius = 0.05f;
+	ball.color = WHITE;
+
+	float deltaTime = 1.0f / 60.0f;
+
+	bool start = false;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -45,28 +58,55 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
-		Matrix4x4 worldMatrix = MakeAfineMatrix(traiangleScale, traiangleRotate, traiangleTranslate);
-		Matrix4x4 cametaMatrix = MakeAfineMatrix(cameraScale, cameraRotate, cameraPosition);
-		Matrix4x4 viewMatrix = Inverse(cametaMatrix);
+		// カメラ位置の更新（球面座標系から直交座標系への変換）
+		cameraPosition.x = cameraDistance * cosf(cameraVerticalAngle) * cosf(cameraHorizontalAngle);
+		cameraPosition.y = cameraDistance * sinf(cameraVerticalAngle);
+		cameraPosition.z = cameraDistance * cosf(cameraVerticalAngle) * sinf(cameraHorizontalAngle);
+
+		// ビュー行列の計算
+		Vector3 cameraTarget{0.0f, 0.0f, 0.0f}; // カメラが見るターゲット（原点）
+		Vector3 up{0.0f, 1.0f, 0.0f};           // 上方向
+
+		Matrix4x4 viewMatrix = MakeLookAtMatrix(cameraPosition, cameraTarget, up);
 		Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(kWindowWidth) / float(kWindowHeight), 0.1f, 100.0f);
+		Matrix4x4 worldMatrix = MakeAffineMatrix(traiangleScale, traiangleRotate, traiangleTranslate);
 		Matrix4x4 worldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 		Matrix4x4 viewportMatrix = MakeViewportMatrix(0, 0, float(kWindowWidth), float(kWindowHeight), 0.0f, 1.0f);
 
+		ImGui::Begin("Camera");
+		ImGui::DragFloat("CameraDistance", &cameraDistance, 0.01f);
+		ImGui::DragFloat("CameraHorizontalAngle", &cameraHorizontalAngle, 0.01f);
+		ImGui::DragFloat("CameraVerticalAngle", &cameraVerticalAngle, 0.01f);
+		ImGui::End();
+
 		ImGui::Begin("Window");
-		ImGui::DragFloat3("sphere[0].center", &sphere.center.x, 0.01f);
-		ImGui::DragFloat("sphere[0].radius", &sphere.radius, 0.01f);
 		ImGui::DragFloat3("Plane.Normal", &plane.normal.x, 0.01f);
 		ImGui::DragFloat("Plane.distance", &plane.distance, 0.01f);
-		ImGui::DragFloat3("CameraTranslate", &cameraPosition.x, 0.01f);
-		ImGui::DragFloat3("CameraRotate", &cameraRotate.x, 0.01f);
+		ImGui::Checkbox("start", &start);
 		ImGui::End();
 
 		plane.normal = Normalize(plane.normal);
 
-		if (IsCollision(sphere, plane)) {
-			sphereColor = RED;
+		if (start) {
+			ball.velocity = ball.acceleration * deltaTime + ball.velocity;
+			ball.position = ball.velocity * deltaTime + ball.position;
 		} else {
-			sphereColor = WHITE;
+			ball.position = {0.8f, 1.2f, 0.3f};
+			ball.velocity = {0.0f, 0.0f, 0.0f};
+			ball.acceleration = {0.0f, -9.8f, 0.0f};
+			ball.mass = 2.0f;
+			ball.radius = 0.05f;
+			ball.color = WHITE;
+		}
+
+		if (IsCollision(Sphere{ball.position,ball.radius}, plane)) {
+			ball.color = RED;
+			Vector3 reflected = Reflect(ball.velocity, plane.normal);
+			Vector3 projectToNormal = Project(reflected, plane.normal);
+			Vector3 movingDirection = reflected - projectToNormal;
+			ball.velocity = projectToNormal * 0.5f + movingDirection;
+		} else {
+			ball.color = WHITE;
 		}
 
 		///
@@ -79,7 +119,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		DrawGrid(worldViewProjectionMatrix, viewportMatrix);
 		DrawPlane(plane, worldViewProjectionMatrix, viewportMatrix, planeColor);
-		DrawSphere(sphere, worldViewProjectionMatrix, viewportMatrix, sphereColor);
+		DrawSphere(Sphere{ball.position, ball.radius}, worldViewProjectionMatrix, viewportMatrix, ball.color);
 
 		///
 		/// ↑描画処理ここまで

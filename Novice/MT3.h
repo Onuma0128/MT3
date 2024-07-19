@@ -31,6 +31,14 @@ struct Plane {
 	Vector3 normal;
 	float distance;
 };
+struct Ball {
+	Vector3 position;
+	Vector3 velocity;
+	Vector3 acceleration;
+	float mass;
+	float radius;
+	unsigned int color;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
@@ -55,10 +63,12 @@ float Length(const Vector3& v);
 Vector3 Normalize(const Vector3& v);
 // スカラー倍
 Vector3 Multiply(float scalar, const Vector3& v);
-// 行列の積
+// 反射ベクトル
+Vector3 Reflect(const Vector3& input, const Vector3& normal);
+    // 行列の積
 Matrix4x4 Multiply(const Matrix4x4& m1, const Matrix4x4& m2);
 // 3次元アフィン変換
-Matrix4x4 MakeAfineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate);
 
 // クロス積
 Vector3 Cross(const Vector3& v1, const Vector3& v2);
@@ -69,6 +79,8 @@ Matrix4x4 MakePerspectiveFovMatrix(float fovY, float aspecRatio, float nearClip,
 Matrix4x4 MakeOrthographicMatrix(float left, float top, float right, float bottom, float nearClip, float farClip);
 // 3、ビューポート変換行列
 Matrix4x4 MakeViewportMatrix(float left, float top, float width, float height, float minDepth, float maxDepth);
+//
+Matrix4x4 MakeLookAtMatrix(const Vector3& Position, const Vector3& target, const Vector3& up);
 
 // 正射影ベクトル
 Vector3 Project(const Vector3& v1, const Vector3& v2);
@@ -92,3 +104,10 @@ void DrawPlane(const Plane& plane, const Matrix4x4& viewProjectionMatrix, const 
 // 数値表示
 static const int kColumnWidth = 60;
 void VectorScreenPrintf(int x, int y, const Vector3& vector, const char* label);
+
+// 二項演算子
+Vector3 operator+(const Vector3& v1, const Vector3& v2);
+Vector3 operator-(const Vector3& v1, const Vector3& v2);
+Vector3 operator*(float s, const Vector3& v);
+Vector3 operator*(const Vector3& v, float s);
+Vector3 operator/(const Vector3& v, float s);
