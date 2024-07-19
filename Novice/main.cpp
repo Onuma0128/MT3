@@ -29,12 +29,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float cameraHorizontalAngle = -1.575f;
 	float cameraVerticalAngle = 0.26f;
 
-	Pendulum pendulum;
-	pendulum.anchor = {0.0f, 1.0f, 0.0f};
-	pendulum.length = 1.25f;
-	pendulum.angle = 0.7f;
-	pendulum.angularVelocity = 0.0f;
-	pendulum.angularAcceleration = 0.0f;
+	ConicalPendlum conicalPendulum{};
+	conicalPendulum.anchor = {0.0f, 1.0f, 0.0f};
+	conicalPendulum.length = 0.8f;
+	conicalPendulum.halfApexAngle = 0.7f;
+	conicalPendulum.angle = 0.0f;
+	conicalPendulum.angularVelocity = 0.0f;
 
 	Sphere sphere{
 	    .center = {0.8f, 0.0f, 0.0f},
@@ -85,18 +85,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::End();
 
 		if (start) {
-			pendulum.angularAcceleration = 
-				-(9.8f / pendulum.length) * std::sin(pendulum.angle);
-			pendulum.angularVelocity += pendulum.angularAcceleration * deltaTime;
-			pendulum.angle += pendulum.angularVelocity * deltaTime;
-
-			sphere.center.x = pendulum.anchor.x + std::sin(pendulum.angle) * pendulum.length;
-			sphere.center.y = pendulum.anchor.y - std::cos(pendulum.angle) * pendulum.length;
-			sphere.center.z = pendulum.anchor.z;
+			conicalPendulum.angularVelocity = std::sqrt(9.8f / (conicalPendulum.length * std::cos(conicalPendulum.halfApexAngle)));
+			conicalPendulum.angle += conicalPendulum.angularVelocity * deltaTime;
 		}
+		float radius = std::sin(conicalPendulum.halfApexAngle) * conicalPendulum.length;
+		float height = std::cos(conicalPendulum.halfApexAngle) * conicalPendulum.length;
+		sphere.center.x = conicalPendulum.anchor.x + std::cos(conicalPendulum.angle) * radius;
+		sphere.center.y = conicalPendulum.anchor.y - height;
+		sphere.center.z = conicalPendulum.anchor.z - std::sin(conicalPendulum.angle) * radius;
 
 		Vector3 p0, p1;
-		p0 = Transform(Transform(pendulum.anchor, worldViewProjectionMatrix), viewportMatrix);
+		p0 = Transform(Transform(conicalPendulum.anchor, worldViewProjectionMatrix), viewportMatrix);
 		p1 = Transform(Transform(sphere.center, worldViewProjectionMatrix), viewportMatrix);
 
 		///

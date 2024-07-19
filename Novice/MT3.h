@@ -64,6 +64,13 @@ struct Pendulum {
 	float angularVelocity;
 	float angularAcceleration;
 };
+struct ConicalPendlum {
+	Vector3 anchor;
+	float length;
+	float halfApexAngle;
+	float angle;
+	float angularVelocity;
+};
 
 // 逆行列
 Matrix4x4 Inverse(const Matrix4x4& m);
